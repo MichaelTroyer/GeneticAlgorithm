@@ -50,6 +50,8 @@ class Route(object):
         coords = [(city.x, city.y) for city in self.cityList]
         Xs, Ys = zip(*coords)
         plt.plot(Xs, Ys)
+        plt.scatter(Xs, Ys)
+        plt.show()
     
     def __repr__(self):
         return '{}'.format('.'.join([str(c.name) for c in self.route]))

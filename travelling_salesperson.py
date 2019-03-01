@@ -82,9 +82,13 @@ def iterGeneration(currentRoutes, eliteProp, mutationRate):
         }
     return results
 
-def geneticAlgorithm(nCities, nRoutes, eliteProp, mutationRate, generations, verbose=True):
+def geneticAlgorithm(nCities, nRoutes, eliteProp, mutationRate, generations, plot=True, verbose=True):
     cities = createCities(nCities, center=100, spread=10)
     routes = createRoutes(cities, nRoutes)
+
+    bestStartingRoute = rankRoutes(routes)[0]
+    startXs = [city.x for city in bestStartingRoute.route]
+    startYs = [city.y for city in bestStartingRoute.route]
 
     evolution_results = []
 
@@ -96,17 +100,38 @@ def geneticAlgorithm(nCities, nRoutes, eliteProp, mutationRate, generations, ver
     best_routes = [result['bestRoute'].distance for result in evolution_results]
     meanEliteDistance = [result['meanEliteDistance'] for result in evolution_results]
     meanPoolDistance = [result['meanPoolDistance'] for result in evolution_results]
-    plt.plot(best_routes)
-    plt.plot(meanEliteDistance)
-    plt.plot(meanPoolDistance)
-    plt.show()
+    if plot:
+        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(12, 4), tight_layout=True)
+        ax1.plot(best_routes, label='Best Route')
+        ax1.plot(meanEliteDistance, label='Mean Elite Route')
+        ax1.plot(meanPoolDistance, label='Mean Pool Route')
+
+        ax2.scatter(startXs, startYs)
+        ax2.plot(startXs + [startXs[0]], startYs + [startYs[0]], label='Starting')
+
+        finalXs = [city.x for city in routes[0].route]
+        finalYs = [city.y for city in routes[0].route]
+        ax3.scatter(finalXs, finalYs)
+        ax3.plot(finalXs + [finalXs[0]], finalYs + [finalYs[0]], label='Ending')
+
+        ax1.set_ylabel('Distance')
+        ax1.set_xlabel('Generations')
+        ax2.set_xlabel('X'); ax2.set_ylabel('Y')
+        ax3.set_xlabel('X'); ax3.set_ylabel('Y')
+        ax1.legend(); ax2.legend(); ax3.legend()
+        plt.show()
+        
     return routes
 
 if __name__ == '__main__':
     
     ga = geneticAlgorithm(
-        nCities=20,
+        nCities=10,
         nRoutes=20,
-        eliteProp=0.2,
-        mutationRate=0.05,
-        generations=100)
+        eliteProp=0.1,
+        mutationRate=0.1,
+        generations=1000,
+        plot=True
+        )
+
+    # ga[0].plot()
