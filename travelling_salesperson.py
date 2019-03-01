@@ -1,4 +1,5 @@
 import random
+import sys
 import numpy as np
 import pandas as pd 
 import matplotlib.pyplot as plt
@@ -82,13 +83,14 @@ def iterGeneration(currentRoutes, eliteProp, mutationRate):
         }
     return results
 
-def geneticAlgorithm(nCities, nRoutes, eliteProp, mutationRate, generations, plot=True, verbose=True):
+def geneticAlgorithm(nCities, nRoutes, eliteProp, mutationRate, generations):
     cities = createCities(nCities, center=100, spread=10)
     routes = createRoutes(cities, nRoutes)
 
     bestStartingRoute = rankRoutes(routes)[0]
     startXs = [city.x for city in bestStartingRoute.route]
     startYs = [city.y for city in bestStartingRoute.route]
+    startDist = bestStartingRoute.distance
 
     evolution_results = []
 
@@ -100,38 +102,43 @@ def geneticAlgorithm(nCities, nRoutes, eliteProp, mutationRate, generations, plo
     best_routes = [result['bestRoute'].distance for result in evolution_results]
     meanEliteDistance = [result['meanEliteDistance'] for result in evolution_results]
     meanPoolDistance = [result['meanPoolDistance'] for result in evolution_results]
-    if plot:
-        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(12, 4), tight_layout=True)
-        ax1.plot(best_routes, label='Best Route')
-        ax1.plot(meanEliteDistance, label='Mean Elite Route')
-        ax1.plot(meanPoolDistance, label='Mean Pool Route')
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(12, 4), tight_layout=True)
+    ax1.plot(best_routes, label='Best Route')
+    ax1.plot(meanEliteDistance, label='Mean Elite Route')
+    ax1.plot(meanPoolDistance, label='Mean Pool Route')
 
-        ax2.scatter(startXs, startYs)
-        ax2.plot(startXs + [startXs[0]], startYs + [startYs[0]], label='Starting')
+    ax2.scatter(startXs, startYs)
+    ax2.plot(
+        startXs + [startXs[0]],
+        startYs + [startYs[0]],
+        label='Starting Distance: {:.4}'.format(startDist)
+        )
 
-        finalXs = [city.x for city in routes[0].route]
-        finalYs = [city.y for city in routes[0].route]
-        ax3.scatter(finalXs, finalYs)
-        ax3.plot(finalXs + [finalXs[0]], finalYs + [finalYs[0]], label='Ending')
+    finalXs = [city.x for city in routes[0].route]
+    finalYs = [city.y for city in routes[0].route]
+    ax3.scatter(finalXs, finalYs)
+    ax3.plot(
+        finalXs + [finalXs[0]],
+        finalYs + [finalYs[0]],
+        label='Final Distance: {:.4}'.format(routes[0].distance)
+        )
 
-        ax1.set_ylabel('Distance')
-        ax1.set_xlabel('Generations')
-        ax2.set_xlabel('X'); ax2.set_ylabel('Y')
-        ax3.set_xlabel('X'); ax3.set_ylabel('Y')
-        ax1.legend(); ax2.legend(); ax3.legend()
-        plt.show()
+    ax1.set_ylabel('Distance')
+    ax1.set_xlabel('Generations')
+    ax2.set_xlabel('X'); ax2.set_ylabel('Y')
+    ax3.set_xlabel('X'); ax3.set_ylabel('Y')
+    ax1.legend(); ax2.legend(); ax3.legend()
+    plt.show()
         
     return routes
 
 if __name__ == '__main__':
     
+    _, nCities, nRoutes, eliteProp, mutationRate, generations = sys.argv
     ga = geneticAlgorithm(
-        nCities=10,
-        nRoutes=20,
-        eliteProp=0.1,
-        mutationRate=0.1,
-        generations=1000,
-        plot=True
+        nCities=int(nCities),
+        nRoutes=int(nRoutes),
+        eliteProp=float(eliteProp),
+        mutationRate=float(mutationRate),
+        generations=int(generations),
         )
-
-    # ga[0].plot()
